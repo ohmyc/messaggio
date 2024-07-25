@@ -63,7 +63,7 @@ var ErrNotProcessed = errors.New("not processed")
 
 func (d *Dal) GetProcessedMessage(id string) (*Message, error) {
 	msg := new(Message)
-	if err := d.inner.Get(`SELECT * FROM messages where id=$1`, id); err != nil {
+	if err := d.inner.Get(msg, `SELECT * FROM messages where id=$1`, id); err != nil {
 		return nil, err
 	}
 	if msg.ProcessedText == nil {
@@ -74,7 +74,7 @@ func (d *Dal) GetProcessedMessage(id string) (*Message, error) {
 
 func (d *Dal) getInt(query string) (int, error) {
 	ret := 0
-	if err := d.inner.Select(&ret, query); err != nil {
+	if err := d.inner.Get(&ret, query); err != nil {
 		return 0, err
 	}
 	return ret, nil
@@ -86,11 +86,11 @@ type Stats struct {
 }
 
 func (d *Dal) GetStats() (*Stats, error) {
-	proc, err := d.getInt("select count(*) from messages where processed_text != NULL")
+	proc, err := d.getInt("select count(*) from messages where processed_text is not NULL")
 	if err != nil {
 		return nil, err
 	}
-	unproc, err := d.getInt("select count(*) from messages where processed_text = NULL")
+	unproc, err := d.getInt("select count(*) from messages where processed_text is NULL")
 	if err != nil {
 		return nil, err
 	}
