@@ -45,7 +45,6 @@ services:
       KAFKA_REQUEST_TOPIC: processing-request
       KAFKA_RESPONSE_TOPIC: processing-response
       APP_ADDRESS: 0.0.0.0:8080
-      PROCESSING_REQUEST_TOPIC:
     build:
       context: ..
       dockerfile: ./build/app.Dockerfile
