@@ -4,8 +4,6 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: messaggio
-    ports:
-      - '5432:5432'
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -16,12 +14,10 @@ services:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
-    ports:
-      - '9092:9092'
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -29,19 +25,29 @@ services:
   echo-app:
     depends_on:
       - kafka
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_REQUEST_TOPIC: processing-request
+      KAFKA_RESPONSE_TOPIC: processing-response
     build:
       context: ..
       dockerfile: ./build/echo.Dockerfile
-    env_file:
-      - ../.env
 
   main-app:
     depends_on:
+      - postgres
       - echo-app
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_REQUEST_TOPIC: processing-request
+      KAFKA_RESPONSE_TOPIC: processing-response
+      APP_ADDRESS: 0.0.0.0:8080
+      PROCESSING_REQUEST_TOPIC:
     build:
       context: ..
       dockerfile: ./build/app.Dockerfile
-    env_file:
-      - ../.env
     ports:
       - '8080:8080'

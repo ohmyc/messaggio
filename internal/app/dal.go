@@ -2,13 +2,22 @@ package app
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 func NewDal() (*Dal, error) {
-	connect, err := sqlx.Connect("postgres", "user=postgres password=postgres dbname=messaggio sslmode=disable")
+	connect, err := sqlx.Connect(
+		"postgres",
+		fmt.Sprintf(
+			"user=%s password=%s host=%s dbname=messaggio sslmode=disable",
+			PostgresUser,
+			PostgresPassword,
+			PostgresHost,
+		),
+	)
 	if err != nil {
 		return nil, err
 	}
