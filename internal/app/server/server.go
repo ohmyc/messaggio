@@ -1,16 +1,23 @@
-package app
+package server
 
 import (
 	"errors"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ohmyc/messaggio/internal/app/dal"
 	"github.com/ohmyc/messaggio/pkg/processing/request"
 )
 
-func NewServer(p *request.Producer, d *Dal) *gin.Engine {
-	g := gin.Default()
-	g.POST("/process", func(context *gin.Context) {
+// ShowAccount godoc
+//
+//	@Summary		Queue message processing
+//	@Description	Consume a json with single "message" field. Processed message has only uppercase letters.
+//	@Accept			json
+//	@Produce		json
+//	@Router			/process [post]
+func process(p *request.Producer, d *dal.Dal) gin.HandlerFunc {
+	return func(context *gin.Context) {
 		req := &struct {
 			Message string `json:"message"`
 		}{}
@@ -30,8 +37,11 @@ func NewServer(p *request.Producer, d *Dal) *gin.Engine {
 			return
 		}
 		context.JSON(200, gin.H{"id": produce})
-	})
-	g.GET("/processed", func(context *gin.Context) {
+	}
+}
+
+func processed(d *dal.Dal) gin.HandlerFunc {
+	return func(context *gin.Context) {
 		id := context.Query("id")
 		if id == "" {
 			context.String(400, "Missing \"id\" query parameter")
@@ -39,7 +49,7 @@ func NewServer(p *request.Producer, d *Dal) *gin.Engine {
 		}
 		message, err := d.GetProcessedMessage(id)
 		if err != nil {
-			if errors.Is(err, ErrNotProcessed) {
+			if errors.Is(err, dal.ErrNotProcessed) {
 				context.String(404, "Not processed message")
 				return
 			} else {
@@ -49,8 +59,11 @@ func NewServer(p *request.Producer, d *Dal) *gin.Engine {
 			}
 		}
 		context.JSON(200, message)
-	})
-	g.GET("/processed-all", func(context *gin.Context) {
+	}
+}
+
+func processedAll(d *dal.Dal) gin.HandlerFunc {
+	return func(context *gin.Context) {
 		messages, err := d.GetAll()
 		if err != nil {
 			fmt.Println("Error getting stats:", err)
@@ -58,8 +71,11 @@ func NewServer(p *request.Producer, d *Dal) *gin.Engine {
 			return
 		}
 		context.JSON(200, messages)
-	})
-	g.GET("/stats", func(context *gin.Context) {
+	}
+}
+
+func stats(d *dal.Dal) gin.HandlerFunc {
+	return func(context *gin.Context) {
 		stats, err := d.GetStats()
 		if err != nil {
 			fmt.Println("Error getting stats:", err)
@@ -67,6 +83,14 @@ func NewServer(p *request.Producer, d *Dal) *gin.Engine {
 			return
 		}
 		context.JSON(200, stats)
-	})
+	}
+}
+
+func NewServer(p *request.Producer, d *dal.Dal) *gin.Engine {
+	g := gin.Default()
+	g.POST("/process", process(p, d))
+	g.GET("/processed", processed(d))
+	g.GET("/processed-all", processedAll(d))
+	g.GET("/stats", stats(d))
 	return g
 }

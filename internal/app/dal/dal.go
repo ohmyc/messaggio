@@ -1,4 +1,4 @@
-package app
+package dal
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/ohmyc/messaggio/internal/app/config"
 )
 
 func NewDal() (*Dal, error) {
@@ -13,9 +14,9 @@ func NewDal() (*Dal, error) {
 		"postgres",
 		fmt.Sprintf(
 			"user=%s password=%s host=%s dbname=messaggio sslmode=disable",
-			PostgresUser,
-			PostgresPassword,
-			PostgresHost,
+			config.PostgresUser,
+			config.PostgresPassword,
+			config.PostgresHost,
 		),
 	)
 	if err != nil {

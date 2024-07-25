@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ohmyc/messaggio/internal/echo"
+	"github.com/ohmyc/messaggio/internal/echo/config"
 	"github.com/ohmyc/messaggio/pkg/processing"
 	"github.com/ohmyc/messaggio/pkg/processing/request"
 	"github.com/ohmyc/messaggio/pkg/processing/response"
 )
 
 func main() {
-	producer, err := response.NewProducer(echo.KafkaBootstrapServers, echo.ResponseTopic)
+	producer, err := response.NewProducer(config.KafkaBootstrapServers, config.ResponseTopic)
 	if err != nil {
 		panic(err)
 	}
-	consumer, err := processing.NewConsumer[request.Model](echo.KafkaBootstrapServers, echo.RequestTopic)
+	consumer, err := processing.NewConsumer[request.Model](config.KafkaBootstrapServers, config.RequestTopic)
 	if err != nil {
 		panic(err)
 	}
