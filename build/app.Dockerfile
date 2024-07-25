@@ -1,7 +1,7 @@
 FROM golang
 WORKDIR /app
 COPY . .
-ENV GOPROXY=direct
+ENV GOPROXY=https://goproxy.io,direct
 RUN go mod download
 RUN go build ./cmd/app
 
