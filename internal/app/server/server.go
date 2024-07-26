@@ -9,20 +9,12 @@ import (
 	"github.com/ohmyc/messaggio/pkg/processing/request"
 )
 
-// ShowAccount godoc
-//
-//	@Summary		Queue message processing
-//	@Description	Consume a json with single "message" field. Processed message has only uppercase letters.
-//	@Accept			json
-//	@Produce		json
-//	@Router			/process [post]
 func process(p *request.Producer, d *dal.Dal) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		req := &struct {
 			Message string `json:"message"`
 		}{}
 		if context.BindJSON(&req) != nil {
-			context.String(400, "Invalid body: expected single field \"message\"")
 			return
 		}
 		produce, err := p.Produce(req.Message)

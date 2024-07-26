@@ -22,17 +22,13 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     healthcheck:
-      test:
-        [
-          "CMD",
-          "kafka-topics",
-          "--list",
-          "--bootstrap-server",
-          "localhost:9092"
-        ]
+      test: [ "CMD", "test", "-f", "/tmp/ready.lock" ]
+      timeout: 5s
       interval: 5s
-      timeout: 10s
-      retries: 3
+      retries: 10
+    volumes:
+      - ./kafka-entrypoint.sh:/entrypoint.sh
+    entrypoint: [ "/entrypoint.sh" ]
 
   echo-app:
     depends_on:
@@ -48,8 +44,10 @@ services:
 
   main-app:
     depends_on:
-      - postgres
-      - echo-app
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_healthy
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_USER: postgres

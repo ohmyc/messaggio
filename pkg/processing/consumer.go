@@ -26,9 +26,12 @@ type Consumer[T any] struct {
 }
 
 func (c *Consumer[T]) Consume() *T {
-	message, _ := c.inner.ReadMessage(-1)
+	message, err := c.inner.ReadMessage(-1)
+	if err != nil {
+		panic(err)
+	}
 	r := new(T)
-	err := json.Unmarshal(message.Value, r)
+	err = json.Unmarshal(message.Value, r)
 	if err != nil {
 		panic(err)
 	}
