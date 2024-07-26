@@ -1,0 +1,43 @@
+services:
+
+  postgres:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    memswap_limit: 2G
+
+  zookeeper:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    memswap_limit: 2G
+
+  kafka:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    memswap_limit: 2G
+
+  echo-app:
+    restart: always
+    deploy:
+        resources:
+          limits:
+            memory: 256M
+    memswap_limit: 2G
+
+  main-app:
+    restart: always
+    ports:
+      - 7010:8080
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    memswap_limit: 2G
